@@ -19,11 +19,12 @@ import scala.util.{Failure, Success}
 /**
   * Project related queries
   */
-class ProjectQueries extends ModelQueries[ProjectTable, Project](classOf[Project], TableQuery[ProjectTable]) {
+class ProjectQueries extends ModelQueries[ProjectTable, Project](classOf[Project],
+                                                                 TableQuery[ProjectTable]) {
 
   val Flags = registrar.register(new ModelQueries[FlagTable, Flag](classOf[Flag], TableQuery[FlagTable]))
+  val Views = registrar.register(new StatQueries[ProjectViewsTable](TableQuery[ProjectViewsTable]))
 
-  private val views = TableQuery[ProjectViewsTable]
   private val stars = TableQuery[ProjectStarsTable]
 
   /**
@@ -72,7 +73,7 @@ class ProjectQueries extends ModelQueries[ProjectTable, Project](classOf[Project
     * @param offset Result set offset
     * @return Projects matching criteria
     */
-  def collect(filter: ProjectTable => Rep[Boolean], sort: ProjectSortingStrategy,
+  def collect(filter: Filter, sort: ProjectSortingStrategy,
               limit: Int, offset: Int): Future[Seq[Project]]
   = collect(limit, offset, filter, Option(sort).map(_.fn).orNull)
 
@@ -86,7 +87,7 @@ class ProjectQueries extends ModelQueries[ProjectTable, Project](classOf[Project
     * @param sort       Ordering
     * @return Filtered projects
     */
-  def collect(filter: ProjectTable => Rep[Boolean], categories: Array[Category],
+  def collect(filter: Filter, categories: Array[Category],
               limit: Int, offset: Int, sort: ProjectSortingStrategy): Future[Seq[Project]] = {
     val f: ProjectTable => Rep[Boolean] = if (categories != null) {
       val cf: ProjectTable => Rep[Boolean] = p => p.category inSetBind categories
@@ -94,49 +95,6 @@ class ProjectQueries extends ModelQueries[ProjectTable, Project](classOf[Project
     } else filter
     collect(f, sort, limit, offset)
   }
-
-  /**
-    * Returns true if the specified Project has been viewed by a client with
-    * the specified cookie.
-    *
-    * @param projectId Project to check
-    * @param cookie    Cookie to look for
-    * @return True if cookie is found
-    */
-  def hasBeenViewedBy(projectId: Int, cookie: String): Future[Boolean] = run((this.views.filter { pv =>
-    pv.projectId === projectId && pv.cookie === cookie
-  }.length > 0).result)
-
-  /**
-    * Sets whether the specified Project has been viewed by a client with
-    * the specified cookie.
-    *
-    * @param projectId Project to check
-    * @param cookie    Cookie to look for
-    */
-  def setViewedBy(projectId: Int, cookie: String): Future[Any]
-  = run(this.views +=(None, Some(cookie), None, projectId))
-
-  /**
-    * Returns true if the specified Project has been viewed by the specified
-    * User.
-    *
-    * @param projectId Project to check
-    * @param userId    User to look for
-    * @return True if user is found
-    */
-  def hasBeenViewedBy(projectId: Int, userId: Int): Future[Boolean] = run((this.views.filter { pv =>
-    pv.projectId === projectId && pv.userId === userId
-  }.length > 0).result)
-
-  /**
-    * Sets whether the specified Project has been viewed by the specified User.
-    *
-    * @param projectId Project to check
-    * @param userId    User to look for
-    * @return True if user is found
-    */
-  def setViewedBy(projectId: Int, userId: Int): Future[Any] = run(this.views +=(None, None, Some(userId), projectId))
 
   /**
     * Returns true if the specified Project is starred by the specified User.

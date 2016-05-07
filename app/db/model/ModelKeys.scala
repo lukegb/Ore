@@ -29,5 +29,6 @@ object ModelKeys {
   val JoinDate              =   "joinDate"
   val AvatarUrl             =   "avatarUrl"
   val RecommendedVersionId  =   "recommendedVersionId"
+  val UserId                =   "userId"
 
 }

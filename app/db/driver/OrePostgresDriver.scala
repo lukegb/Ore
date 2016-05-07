@@ -12,11 +12,11 @@ import ore.project.{Categories, FlagReasons}
 /**
   * Custom Postgres driver to support array data and custom type mappings.
   */
-trait OrePostgresDriver extends ExPostgresDriver with PgArraySupport {
+trait OrePostgresDriver extends ExPostgresDriver with PgArraySupport with PgNetSupport {
 
   override val api = OreDriver
 
-  object OreDriver extends API with ArrayImplicits with OreTypes {
+  object OreDriver extends API with ArrayImplicits with NetImplicits with OreTypes {
     implicit val strListTypeMapper = new SimpleArrayJdbcType[String]("text").to(_.toList)
     implicit val colorTypeMapper = MappedJdbcType.base[Color, Int](_.id, Colors.apply)
     implicit val roleTypeTypeMapper = MappedJdbcType.base[RoleType, Int](_.roleId, RoleTypes.withId)

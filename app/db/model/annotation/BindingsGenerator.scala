@@ -71,6 +71,6 @@ object BindingsGenerator {
   }
 
   def getRep[A](name: String, table: ModelTable[_])
-  = table.getClass.getDeclaredMethod(name).invoke(table).asInstanceOf[Rep[A]]
+  = table.getClass.getMethod(name).invoke(table).asInstanceOf[Rep[A]]
 
 }

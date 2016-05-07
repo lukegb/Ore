@@ -3,7 +3,7 @@ package db
 import java.sql.Timestamp
 
 import db.driver.OrePostgresDriver.api._
-import db.model.ModelTable
+import db.model.{ModelTable, StatTable}
 import models.project._
 import models.user.{ProjectRole, User}
 import ore.Colors.Color
@@ -43,17 +43,7 @@ class ProjectTable(tag: Tag) extends ModelTable[Project](tag, "projects") {
 
 }
 
-class ProjectViewsTable(tag: Tag) extends Table[(Option[Int], Option[String],
-                                                 Option[Int], Int)](tag, "project_views") {
-
-  def id          =   column[Int]("id", O.PrimaryKey, O.AutoInc)
-  def cookie      =   column[String]("cookie")
-  def userId      =   column[Int]("user_id")
-  def projectId   =   column[Int]("project_id")
-
-  override def * = (id.?, cookie.?, userId.?, projectId)
-
-}
+class ProjectViewsTable(tag: Tag) extends StatTable(tag, "project_views", "project_id")
 
 class ProjectStarsTable(tag: Tag) extends Table[(Int, Int)](tag, "project_stars") {
 
@@ -103,17 +93,7 @@ class VersionTable(tag: Tag) extends ModelTable[Version](tag, "versions") {
                     description.?, downloads, isReviewed) <> ((Version.apply _).tupled, Version.unapply)
 }
 
-class VersionDownloadsTable(tag: Tag) extends Table[(Option[Int], Option[String],
-                                                     Option[Int], Int)](tag, "version_downloads") {
-
-  def id          =   column[Int]("id", O.PrimaryKey, O.AutoInc)
-  def cookie      =   column[String]("cookie")
-  def userId      =   column[Int]("user_id")
-  def versionId   =   column[Int]("version_id")
-
-  override def * = (id.?, cookie.?, userId.?, versionId)
-
-}
+class VersionDownloadsTable(tag: Tag) extends StatTable(tag, "version_downloads", "version_id")
 
 class UserTable(tag: Tag) extends ModelTable[User](tag, "users") {
 

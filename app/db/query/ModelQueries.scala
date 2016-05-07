@@ -25,6 +25,8 @@ import scala.util.{Failure, Success, Try}
 class ModelQueries[Table <: ModelTable[Row], Row <: Model](val modelClass: Class[Row],
                                                            val baseQuery: TableQuery[Table]) {
 
+  type Filter = Table => Rep[Boolean]
+
   // Generic (delegate to companion object)
 
   def insert(model: Row) = ModelQueries.insert(model)
